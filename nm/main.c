@@ -23,7 +23,7 @@ void print_sym(void *buffer, void *shdr)
 
         // todo name isnt right
         printf("%016zx %zu %zu %zu: %s\n", value, size, nm, section,
-            get_name(buffer, nm));
+            get_symbol_name(buffer, nm));
     }
 }
 

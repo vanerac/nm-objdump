@@ -33,6 +33,7 @@ bool *is64architecture(void);
                         :   ((Elf32_Sym *)__buff)->__var_name)
 
 char *get_name(void *buffer, size_t index);
+char *get_symbol_name(void *buffer, size_t index);
 
 size_t parse_file(char *path, void **buff);
 #endif //C_TOOLS_H

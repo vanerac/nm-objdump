@@ -19,10 +19,26 @@ bool *is64architecture()
     return &arch;
 }
 
+char *get_symbol_name(void *buffer, size_t index)
+{
+    for (int i = 1; i < GET_ELF_EHDR(buffer, e_shnum); ++i) {
+        char *shdr = (buffer + GET_ELF_EHDR(buffer, e_shoff)) + (GET_ELF_EHDR
+        (buffer, e_shentsize) * i);
+        if (GET_ELF_SHDR(shdr, sh_type) == SHT_STRTAB && GET_ELF_SHDR(shdr,
+            sh_flags) == 0) {
+            char *tab = buffer + GET_ELF_SHDR(shdr, sh_offset);
+            return &tab[index];
+        }
+    }
+
+    return NULL;
+
+}
+
 char *get_name(void *buffer, size_t index)
 {
     void *tab_header = buffer + GET_ELF_EHDR(buffer, e_shoff) + (GET_ELF_EHDR
-        (buffer, e_shentsize) * GET_ELF_EHDR(buffer, e_shstrndx));
+    (buffer, e_shentsize) * GET_ELF_EHDR(buffer, e_shstrndx));
     char *tab = buffer + GET_ELF_SHDR(tab_header, sh_offset);
 
     return &tab[index];
