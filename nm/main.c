@@ -21,9 +21,8 @@ void print_sym(void *buffer, void *shdr)
         size_t size = GET_ELF_SYM(sym, st_size);
         //        size_t ref =
 
-        // todo name isnt right
-        printf("%016zx %zu %zu %zu: %s\n", value, size, nm, section,
-            get_symbol_name(buffer, nm));
+        // todo flag parse
+        printf("%016zx %% %s\n", value, get_symbol_name(buffer, nm));
     }
 }
 
@@ -42,8 +41,6 @@ int main(int ac, char **ag)
     for (int i = 1; i < GET_ELF_EHDR(buffer, e_shnum); ++i) {
         void *shdr = (buffer + GET_ELF_EHDR(buffer, e_shoff)) + (GET_ELF_EHDR
         (buffer, e_shentsize) * i);
-        printf("section name: %s\n",
-            get_name(buffer, GET_ELF_SHDR(shdr, sh_name)));
         if (GET_ELF_SHDR(shdr, sh_type) == SHT_SYMTAB) {
             print_sym(buffer, shdr);
         }

@@ -25,22 +25,50 @@ void print_header(char *filename, void *buffer)
     // start address
     // \n
 
-    // todo flags
+    // todo flags print
 
 
 }
 
-void print_section(const char *name, void *addr)
+void print_text(char *str, int size)
+{
+    printf("\t");
+    for (int i = 0; i < size; ++i) {
+        if (str[i] >= 32 && str[i] <= 127)
+            printf("%c", str[i]);
+        else
+            printf(".");
+    }
+}
+
+void print_section(const char *name, void *buffer, void *addr)
 {
     printf("Contents of section %s:\n", name);
-    //    for (size_t i = 0; i < GET_ELF_SHDR(addr, sh_size); ++i) {
-    //        if (!(i % 5) && i != 0)
-    //            printf("\n");
-    //        printf("%04lx ", GET_ELF_SHDR(addr, sh_addr));
-    //
-    //    }
-    // todo hexdump nsm
-    // todo filter sections to print
+    unsigned char *add = buffer + GET_ELF_SHDR(addr, sh_offset);
+    size_t i = 0;
+    for (; i < GET_ELF_SHDR(addr, sh_size); ++i) {
+
+        if (!(i % 16) && i != 0) {
+            print_text(&add[i - 16], 16);
+            printf("\n");
+        }
+
+        if (!(i % 4))
+            printf(" ");
+
+        printf("%02x", add[i]);
+    }
+
+    int rest = i % 16;
+    //    for (int index = rest; index < 16; ++index)
+    //    printf("\n%zu %lu\n", i, (i / (16 * 4)));
+    for (int index = i; index % (16 * 2); ++index) {
+        // todo fix alignment
+        printf(" ");
+    }
+
+    print_text(&add[i - rest], rest);
+
     printf("\n");
 }
 
@@ -59,7 +87,8 @@ int main(int ac, char **ag)
     for (int i = 1; i < GET_ELF_EHDR(buffer, e_shnum); ++i) {
         void *shdr = (buffer + GET_ELF_EHDR(buffer, e_shoff)) + (GET_ELF_EHDR
         (buffer, e_shentsize) * i);
-        print_section(get_name(buffer, GET_ELF_SHDR(shdr, sh_name)), shdr);
+        print_section(get_name(buffer, GET_ELF_SHDR(shdr, sh_name)), buffer,
+            shdr);
     }
     munmap(buffer, size);
     return 0;
