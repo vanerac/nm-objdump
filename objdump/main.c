@@ -25,6 +25,8 @@ void print_header(char *filename, void *buffer)
     // start address
     // \n
 
+    // todo flags
+
 
 }
 
@@ -50,19 +52,14 @@ int main(int ac, char **ag)
     size_t size = parse_file(ag[1], &buffer);
     if (!size)
         return 84;
-    is64arch = GET_ELF_EHDR(buffer, e_ident[EI_CLASS]);
     if (GET_ELF_EHDR(buffer, e_ident[EI_VERSION]) != EV_CURRENT)
         return 84;
     print_header(ag[1], buffer);
 
-    void *tab_header = buffer + GET_ELF_EHDR(buffer, e_shoff) + (GET_ELF_EHDR
-    (buffer, e_shentsize) * GET_ELF_EHDR(buffer, e_shstrndx));
-    char *tab = buffer + GET_ELF_SHDR(tab_header, sh_offset);
-
     for (int i = 1; i < GET_ELF_EHDR(buffer, e_shnum); ++i) {
         void *shdr = (buffer + GET_ELF_EHDR(buffer, e_shoff)) + (GET_ELF_EHDR
         (buffer, e_shentsize) * i);
-        print_section(&tab[GET_ELF_SHDR(shdr, sh_name)], shdr);
+        print_section(get_name(buffer, GET_ELF_SHDR(shdr, sh_name)), shdr);
     }
     munmap(buffer, size);
     return 0;

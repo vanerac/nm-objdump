@@ -11,6 +11,7 @@
 #include <sys/stat.h>
 #include <zconf.h>
 #include <stdbool.h>
+#include "tools.h"
 
 bool *is64architecture()
 {
@@ -20,7 +21,11 @@ bool *is64architecture()
 
 char *get_name(void *buffer, size_t index)
 {
-    return NULL;
+    void *tab_header = buffer + GET_ELF_EHDR(buffer, e_shoff) + (GET_ELF_EHDR
+        (buffer, e_shentsize) * GET_ELF_EHDR(buffer, e_shstrndx));
+    char *tab = buffer + GET_ELF_SHDR(tab_header, sh_offset);
+
+    return &tab[index];
 }
 
 size_t parse_file(char *path, void **buff)
@@ -34,5 +39,6 @@ size_t parse_file(char *path, void **buff)
     fstat(fd, &s);
     *buff = mmap(NULL, s.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
     close(fd);
+    is64arch = GET_ELF_EHDR(*buff, e_ident[EI_CLASS]);
     return s.st_size;
 }
