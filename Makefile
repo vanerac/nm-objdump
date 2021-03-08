@@ -23,6 +23,10 @@ OBJDUMP	=		my_objdump
 
 all:	$(NM) $(OBJDUMP)
 
+nm:		$(NM)
+
+objdump:	$(OBJDUMP)
+
 $(NM): $(OBJ) $(ONM_MAIN)
 	gcc -o $(NM) $(OBJ) $(ONM_MAIN) $(CFLAGS)
 
