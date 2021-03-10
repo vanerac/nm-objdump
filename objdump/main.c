@@ -6,24 +6,32 @@
 */
 
 #include <stddef.h>
-# include <fcntl.h>
 # include <stdio.h>
 # include <elf.h>
 # include <sys/mman.h>
-# include <sys/stat.h>
-#include <unistd.h>
+#include "../flags.h"
 #include "../tools/tools.h"
+
+int has_syms(void *buffer)
+{
+    // cycle through
+}
 
 void print_header(char *filename, void *buffer)
 {
-    GET_ELF_EHDR(buffer, e_type); // type
-    GET_ELF_EHDR(buffer, e_entry); // entry point
-    GET_ELF_EHDR(buffer, e_flags); // flags
+    int type = GET_ELF_EHDR(buffer, e_type);
+    if (type | EXEC_P)
+        printf("exec \n");
+    if (type | HAS_SYMS)
+        printf("sysm \n");
+    if (type | D_PAGED)
+        printf("DPAGED\n");
 
-    // file name: type
-    // arch: arch type, flags : flags
-    // start address
-    // \n
+    printf("\n%s:\tfile format %s\n", filename,
+        IS64ARCH ? "elf64-x86-64" : "elf32-i386");
+    printf("architecture: %s,", "TODO"); // todo
+    printf("flags 0x%08x:\n", type); //  TODO for flags, get program header
+    printf("start address 0x%016lx\n\n", GET_ELF_EHDR(buffer, e_entry));
 
     // todo flags print
 
@@ -34,11 +42,14 @@ void print_text(char *str, int size)
 {
     printf("\t");
     for (int i = 0; i < size; ++i) {
-        if (str[i] >= 32 && str[i] <= 127)
+        if (str[i] >= 32 && str[i] < 127)
             printf("%c", str[i]);
         else
             printf(".");
     }
+    int diff = 16 - size;
+    for (int i = 0; i < diff; ++i)
+        printf(" ");
 }
 
 void print_section(const char *name, void *buffer, void *addr)
@@ -59,15 +70,12 @@ void print_section(const char *name, void *buffer, void *addr)
         printf("%02x", add[i]);
     }
 
-    int rest = i % 16;
-    //    for (int index = rest; index < 16; ++index)
-    //    printf("\n%zu %lu\n", i, (i / (16 * 4)));
-    for (int index = i; index % (16 * 2); ++index) {
-        // todo fix alignment
+    unsigned long diff = (i % 16);
+    for (unsigned long index = 0;
+        diff && index < ((16 - diff) * 2 + (16 - diff) / 4); ++index)
         printf(" ");
-    }
 
-    print_text(&add[i - rest], rest);
+    print_text(&add[i - diff], diff);
 
     printf("\n");
 }
