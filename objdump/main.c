@@ -63,10 +63,8 @@ void print_section(const char *name, void *buffer, void *addr)
             print_text(&add[i - 16], 16);
             printf("\n");
         }
-
         if (!(i % 4))
             printf(" ");
-
         printf("%02x", add[i]);
     }
 
@@ -75,6 +73,7 @@ void print_section(const char *name, void *buffer, void *addr)
         diff && index < ((16 - diff) * 2 + (16 - diff) / 4); ++index)
         printf(" ");
 
+    diff = !diff ? 16 : diff;
     print_text(&add[i - diff], diff);
 
     printf("\n");
