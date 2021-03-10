@@ -20,16 +20,16 @@ int has_syms(void *buffer)
 void print_header(char *filename, void *buffer)
 {
     int type = GET_ELF_EHDR(buffer, e_type);
-    if (type | EXEC_P)
-        printf("exec \n");
-    if (type | HAS_SYMS)
-        printf("sysm \n");
-    if (type | D_PAGED)
-        printf("DPAGED\n");
+//    if (type | EXEC_P)
+//        printf("exec \n");
+//    if (type | HAS_SYMS)
+//        printf("sysm \n");
+//    if (type | D_PAGED)
+//        printf("DPAGED\n");
 
     printf("\n%s:\tfile format %s\n", filename,
         IS64ARCH ? "elf64-x86-64" : "elf32-i386");
-    printf("architecture: %s,", "TODO"); // todo
+    printf("architecture: %s, ", "i386:x86-64"); // todo
     printf("flags 0x%08x:\n", type); //  TODO for flags, get program header
     printf("start address 0x%016lx\n\n", GET_ELF_EHDR(buffer, e_entry));
 
