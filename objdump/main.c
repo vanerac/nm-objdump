@@ -17,7 +17,6 @@ int has_sym(void *buffer)
     for (int i = 0; i < GET_ELF_EHDR(buffer, e_shnum); ++i) {
         void *shdr = (buffer + GET_ELF_EHDR(buffer, e_shoff)) + (GET_ELF_EHDR
         (buffer, e_shentsize) * i);
-        int is64 = IS64ARCH;
         if (GET_ELF_SHDR(shdr, sh_type) == SHT_SYMTAB)
             return 1;
     }
@@ -74,7 +73,7 @@ void print_section(const char *name, void *buffer, void *addr)
             printf("\n");
         }
         if (!(i % 16))
-            printf("%04x ", GET_ELF_SHDR(addr, sh_addr) + i);
+            printf(" %04lx", GET_ELF_SHDR(addr, sh_addr) + i);
 
         if (!(i % 4))
             printf(" ");
