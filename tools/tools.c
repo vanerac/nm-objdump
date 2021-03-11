@@ -15,7 +15,7 @@
 
 bool *is64architecture()
 {
-    static bool arch = 2;
+    static bool arch = 1;
     return &arch;
 }
 
@@ -64,6 +64,6 @@ size_t parse_file(char *path, void **buff)
     fstat(fd, &s);
     *buff = mmap(NULL, s.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
     close(fd);
-    IS64ARCH = GET_ELF_EHDR(*buff, e_ident[EI_CLASS]);
+    IS64ARCH = GET_ELF_EHDR(*buff, e_ident[EI_CLASS]) == 1 ? 0 : 1;
     return s.st_size;
 }

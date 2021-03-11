@@ -81,11 +81,11 @@ int main(int ac, char **ag)
     if (ac < 2)
         return 84;
     size_t size = parse_file(ag[1], &buffer);
-    if (!size)
+    if (error_check(size, buffer)) {
+        munmap(buffer, size);
         return 84;
+    }
 
-    // cycle through sections
-    // sh_type == SHT_SYMTAB
 
     for (int i = 1; i < GET_ELF_EHDR(buffer, e_shnum); ++i) {
         void *shdr = (buffer + GET_ELF_EHDR(buffer, e_shoff)) + (GET_ELF_EHDR

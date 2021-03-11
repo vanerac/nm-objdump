@@ -12,27 +12,27 @@
 #include "../flags.h"
 #include "../tools/tools.h"
 
-int has_sym(void *buffer) {
-    // todo shdr[i].sh_type == SHT_SYMTAB
-    for (int i = 1; i < GET_ELF_EHDR(buffer, e_shnum); ++i) {
+int has_sym(void *buffer)
+{
+    for (int i = 0; i < GET_ELF_EHDR(buffer, e_shnum); ++i) {
         void *shdr = (buffer + GET_ELF_EHDR(buffer, e_shoff)) + (GET_ELF_EHDR
         (buffer, e_shentsize) * i);
+        int is64 = IS64ARCH;
         if (GET_ELF_SHDR(shdr, sh_type) == SHT_SYMTAB)
             return 1;
     }
-    return  0;
+    return 0;
 }
 
 void print_header(char *filename, void *buffer)
 {
     int type = GET_ELF_EHDR(buffer, e_type);
     unsigned int flags = 0;
-    char *delim = "";
+    // todo print flags
 
-
-     flags = type == ET_EXEC  ?(EXEC_P | D_PAGED) : flags;
-     flags = type == ET_DYN ? (DYNAMIC | D_PAGED) : flags;
-     flags = type == ET_REL ? HAS_RELOC : flags;
+    flags = type == ET_EXEC ? (EXEC_P | D_PAGED) : flags;
+    flags = type == ET_DYN ? (DYNAMIC | D_PAGED) : flags;
+    flags = type == ET_REL ? HAS_RELOC : flags;
 
     if (has_sym(buffer))
         flags = flags | HAS_SYMS;
@@ -42,7 +42,6 @@ void print_header(char *filename, void *buffer)
     printf("architecture: %s, ", "i386:x86-64");
     printf("flags 0x%08x:\n", flags);
     printf("start address 0x%016lx\n\n", GET_ELF_EHDR(buffer, e_entry));
-
 }
 
 void print_text(unsigned char *str, int size)
@@ -61,6 +60,7 @@ void print_text(unsigned char *str, int size)
 
 void print_section(const char *name, void *buffer, void *addr)
 {
+    // todo test wil rel file
     printf("Contents of section %s:\n", name);
     unsigned char *add = buffer + GET_ELF_SHDR(addr, sh_offset);
     size_t i = 0;
@@ -86,13 +86,15 @@ void print_section(const char *name, void *buffer, void *addr)
     printf("\n");
 }
 
-int my_objdump(char *name) {
+int my_objdump(char *name)
+{
     void *buffer;
 
     size_t size = parse_file(name, &buffer);
-    if (error_check(size, buffer))
+    if (error_check(size, buffer)) {
+        munmap(buffer, size);
         return 1;
-
+    }
     print_header(name, buffer);
 
     for (int i = 1; i < GET_ELF_EHDR(buffer, e_shnum); ++i) {
