@@ -61,8 +61,11 @@ void print_text(unsigned char *str, int size)
 void print_section(const char *name, void *buffer, void *addr)
 {
     // todo test wil rel file
+    if (!GET_ELF_SHDR(addr, sh_size))
+        return;
     printf("Contents of section %s:\n", name);
     unsigned char *add = buffer + GET_ELF_SHDR(addr, sh_offset);
+
     size_t i = 0;
     for (; i < GET_ELF_SHDR(addr, sh_size); ++i) {
 
@@ -70,10 +73,14 @@ void print_section(const char *name, void *buffer, void *addr)
             print_text(&add[i - 16], 16);
             printf("\n");
         }
+        if (!(i % 16))
+            printf("%04x ", GET_ELF_SHDR(addr, sh_addr) + i);
+
         if (!(i % 4))
             printf(" ");
         printf("%02x", add[i]);
     }
+
 
     unsigned long diff = (i % 16);
     for (unsigned long index = 0;
