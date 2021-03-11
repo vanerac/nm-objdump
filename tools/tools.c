@@ -24,15 +24,24 @@ char *get_symbol_name(void *buffer, size_t index)
     for (int i = 1; i < GET_ELF_EHDR(buffer, e_shnum); ++i) {
         char *shdr = (buffer + GET_ELF_EHDR(buffer, e_shoff)) + (GET_ELF_EHDR
         (buffer, e_shentsize) * i);
-        if (GET_ELF_SHDR(shdr, sh_type) == SHT_STRTAB && GET_ELF_SHDR(shdr,
-            sh_flags) == 0) {
+        if (GET_ELF_SHDR(shdr, sh_type) == SHT_STRTAB &&
+            GET_ELF_SHDR(shdr, sh_flags) == 0) {
             char *tab = buffer + GET_ELF_SHDR(shdr, sh_offset);
             return &tab[index];
         }
     }
 
     return NULL;
+}
 
+int error_check(size_t size, void *buffer)
+{
+    if (!size)
+        return 1;
+    if (GET_ELF_EHDR(buffer, e_ident[EI_VERSION]) != EV_CURRENT)
+        return 1;
+    // todo check magic
+    return 0;
 }
 
 char *get_name(void *buffer, size_t index)
