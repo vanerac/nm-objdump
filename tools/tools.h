@@ -18,17 +18,17 @@
 #include <unistd.h>
 
 bool *is64architecture(void);
-#define is64arch        (*is64architecture())
+#define IS64ARCH        (*is64architecture())
 
-#define GET_ELF_EHDR(__buff, __var_name)        (is64arch ?         \
+#define GET_ELF_EHDR(__buff, __var_name)        (IS64ARCH ?         \
                             ((Elf64_Ehdr *)__buff)->__var_name      \
                         :   ((Elf32_Ehdr *)__buff)->__var_name)
 
-#define GET_ELF_SHDR(__buff, __var_name)        (is64arch ?         \
+#define GET_ELF_SHDR(__buff, __var_name)        (IS64ARCH ?         \
                             ((Elf64_Shdr *)__buff)->__var_name      \
                         :   ((Elf32_Shdr *)__buff)->__var_name)
 
-#define GET_ELF_SYM(__buff, __var_name)        (is64arch ?         \
+#define GET_ELF_SYM(__buff, __var_name)        (IS64ARCH ?         \
                             ((Elf64_Sym *)__buff)->__var_name      \
                         :   ((Elf32_Sym *)__buff)->__var_name)
 

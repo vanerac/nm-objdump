@@ -55,6 +55,6 @@ size_t parse_file(char *path, void **buff)
     fstat(fd, &s);
     *buff = mmap(NULL, s.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
     close(fd);
-    is64arch = GET_ELF_EHDR(*buff, e_ident[EI_CLASS]);
+    IS64ARCH = GET_ELF_EHDR(*buff, e_ident[EI_CLASS]);
     return s.st_size;
 }
