@@ -11,6 +11,7 @@
 #include <sys/stat.h>
 #include <zconf.h>
 #include <stdbool.h>
+#include <string.h>
 #include "tools.h"
 
 bool *is64architecture()
@@ -41,6 +42,8 @@ int error_check(size_t size, void *buffer)
     if (GET_ELF_EHDR(buffer, e_ident[EI_VERSION]) != EV_CURRENT)
         return 1;
     // todo check magic
+    // todo file format
+    // todo open failed
     return 0;
 }
 
@@ -53,17 +56,30 @@ char *get_name(void *buffer, size_t index)
     return &tab[index];
 }
 
-size_t parse_file(char *path, void **buff)
+size_t parse_file(char *prog_name, char *path, void **buff)
 {
     int fd;
     struct stat s;
 
-    fd = open(path, O_RDONLY);
-    if (fd < 0)
+    if ((fd = open(path, O_RDONLY)) < 0)
         return 0;
     fstat(fd, &s);
     *buff = mmap(NULL, s.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
     close(fd);
+    int class = GET_ELF_EHDR(*buff, e_ident[EI_CLASS]);
+    int data = GET_ELF_EHDR(*buff, e_ident[EI_DATA]);
+    IS64ARCH = GET_ELF_EHDR(*buff, e_ident[EI_CLASS]) == 1 ? 0 : 1;
+
+    if ((class != ELFCLASS64 && class != ELFCLASS32) ||
+        (data != ELFDATA2LSB && data != ELFDATA2MSB) ||
+        (GET_ELF_EHDR(*buff, e_shnum) * GET_ELF_EHDR(*buff, e_shentsize) +
+            GET_ELF_EHDR(*buff, e_shoff) > s.st_size) ||
+        strncmp((char *) *buff, "\x7f\x45\x4c\x46", 4) != 0) {
+        fprintf(stderr, "%s: %s: %s\n", prog_name, path,
+            "file format not recognized");
+        return 0;
+    }
+
     IS64ARCH = GET_ELF_EHDR(*buff, e_ident[EI_CLASS]) == 1 ? 0 : 1;
     return s.st_size;
 }

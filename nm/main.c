@@ -83,7 +83,7 @@ int my_nm(char *prog_name, char *path)
 {
     void *buffer;
 
-    size_t size = parse_file(path, &buffer);
+    size_t size = parse_file(prog_name, path, &buffer);
     if (error_check(size, buffer)) {
         munmap(buffer, size);
         return 84;

@@ -36,5 +36,5 @@ char *get_name(void *buffer, size_t index);
 char *get_symbol_name(void *buffer, size_t index);
 int error_check(size_t size, void *buffer);
 
-size_t parse_file(char *path, void **buff);
+size_t parse_file(char *prog_name, char *path, void **buff);
 #endif //C_TOOLS_H

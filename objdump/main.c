@@ -95,7 +95,7 @@ int my_objdump(char *prog_name, char *name)
 {
     void *buffer;
 
-    size_t size = parse_file(name, &buffer);
+    size_t size = parse_file(prog_name, name, &buffer);
     if (error_check(size, buffer)) {
         munmap(buffer, size);
         return 84;
