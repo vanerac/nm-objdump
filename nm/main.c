@@ -28,14 +28,15 @@ char symbol_type(size_t value, int type, int bind)
     case STT_FUNC:
         if (!value)
             ret = 'u';
-        else ret = 't';
+        else
+            ret = 't';
         break;
-//    case STT_SECTION:
-//        ret = 's';
-//        break;
-//    case STT_FILE:
-//        ret = '-';
-//        break;
+        //    case STT_SECTION:
+        //        ret = 's';
+        //        break;
+        //    case STT_FILE:
+        //        ret = '-';
+        //        break;
     default:
         return '?';
     }
@@ -49,7 +50,6 @@ void print_sym(void *buffer, void *shdr)
     for (size_t i = 0;
         i < GET_ELF_SHDR(shdr, sh_size); i += GET_ELF_SHDR(shdr, sh_entsize)) {
 
-
         void *sym = (buffer + GET_ELF_SHDR(shdr, sh_offset) + i);
 
         size_t nm = GET_ELF_SYM(sym, st_name);
@@ -59,19 +59,23 @@ void print_sym(void *buffer, void *shdr)
         int visibility =
             !IS64ARCH ? ELF32_ST_VISIBILITY(GET_ELF_SYM(sym, st_other)) :
                 ELF32_ST_VISIBILITY(GET_ELF_SYM(sym, st_other));
-
-        if (visibility != STV_DEFAULT)
-            continue;
         int type = !IS64ARCH ? ELF32_ST_TYPE(GET_ELF_SYM(sym, st_info)) :
             ELF64_ST_TYPE(GET_ELF_SYM(sym, st_info));
         int bind = !IS64ARCH ? ELF32_ST_BIND(GET_ELF_SYM(sym, st_info)) :
             ELF64_ST_BIND(GET_ELF_SYM(sym, st_info));
 
-        if (type == STT_FILE)
-            continue;;
+        if (type == STT_FILE || visibility != STV_DEFAULT)
+            continue;
 
-        printf("%016zx %c %s\n", value, symbol_type(value, type, bind),
-            get_symbol_name(buffer, nm));
+        // todo filter null names
+        // todo sort
+        if (value)
+            printf("%016zx", value);
+        else
+            printf("                ");
+        printf(" %c %s\n",
+            //            symbol_type(value, type, bind),
+            '?', get_symbol_name(buffer, nm));
     }
 }
 
@@ -85,7 +89,6 @@ int main(int ac, char **ag)
         munmap(buffer, size);
         return 84;
     }
-
 
     for (int i = 1; i < GET_ELF_EHDR(buffer, e_shnum); ++i) {
         void *shdr = (buffer + GET_ELF_EHDR(buffer, e_shoff)) + (GET_ELF_EHDR
