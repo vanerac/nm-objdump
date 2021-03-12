@@ -18,6 +18,7 @@
 #include <unistd.h>
 
 bool *is64architecture(void);
+
 #define IS64ARCH        (*is64architecture())
 
 #define GET_ELF_EHDR(__buff, __var_name)        (IS64ARCH ?         \
@@ -33,8 +34,11 @@ bool *is64architecture(void);
                         :   ((Elf32_Sym *)__buff)->__var_name)
 
 char *get_name(void *buffer, size_t index);
+
 char *get_symbol_name(void *buffer, size_t index);
+
 int error_check(size_t size, void *buffer);
 
 size_t parse_file(char *prog_name, char *path, void **buff);
+
 #endif //C_TOOLS_H

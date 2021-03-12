@@ -12,31 +12,21 @@
 #include "../flags.h"
 #include "../tools/tools.h"
 
-int has_sym(void *buffer)
-{
-    for (int i = 0; i < GET_ELF_EHDR(buffer, e_shnum); ++i) {
-        void *shdr = (buffer + GET_ELF_EHDR(buffer, e_shoff)) + (GET_ELF_EHDR
-        (buffer, e_shentsize) * i);
-        if (GET_ELF_SHDR(shdr, sh_type) == SHT_SYMTAB)
-            return 1;
-    }
-    return 0;
-}
-
 void print_header(char *filename, void *buffer)
 {
     int type = GET_ELF_EHDR(buffer, e_type);
     unsigned int flags = 0;
-    // todo print flags
-    // todo test for rel file
-
     flags = type == ET_EXEC ? (EXEC_P | D_PAGED) : flags;
     flags = type == ET_DYN ? (DYNAMIC | D_PAGED) : flags;
     flags = type == ET_REL ? HAS_RELOC : flags;
-
-    if (has_sym(buffer))
-        flags = flags | HAS_SYMS;
-
+    for (int i = 0; i < GET_ELF_EHDR(buffer, e_shnum); ++i) {
+        void *shdr = (buffer + GET_ELF_EHDR(buffer, e_shoff)) + (GET_ELF_EHDR
+        (buffer, e_shentsize) * i);
+        if (GET_ELF_SHDR(shdr, sh_type) == SHT_SYMTAB) {
+            flags = flags | HAS_SYMS;
+            break;
+        }
+    }
     printf("\n%s:\tfile format %s\n", filename,
         IS64ARCH ? "elf64-x86-64" : "elf32-i386");
     printf("architecture: %s, ", "i386:x86-64");
@@ -56,6 +46,7 @@ void print_text(unsigned char *str, int size)
     int diff = 16 - size;
     for (int i = 0; i < diff; ++i)
         printf(" ");
+    printf("\n");
 }
 
 void print_section(const char *name, void *buffer, void *addr)
@@ -64,31 +55,22 @@ void print_section(const char *name, void *buffer, void *addr)
         return;
     printf("Contents of section %s:\n", name);
     unsigned char *add = buffer + GET_ELF_SHDR(addr, sh_offset);
-
     size_t i = 0;
     for (; i < GET_ELF_SHDR(addr, sh_size); ++i) {
-
-        if (!(i % 16) && i != 0) {
+        if (!(i % 16) && i != 0)
             print_text(&add[i - 16], 16);
-            printf("\n");
-        }
         if (!(i % 16))
             printf(" %04lx", GET_ELF_SHDR(addr, sh_addr) + i);
-
         if (!(i % 4))
             printf(" ");
         printf("%02x", add[i]);
     }
-
     unsigned short diff = (i % 16);
     for (unsigned short index = 0;
         diff && index < ((16 - diff) * 2 + (16 - diff) / 4); ++index)
         printf(" ");
-
     diff = !diff ? 16 : diff;
     print_text(&add[i - diff], diff);
-
-    printf("\n");
 }
 
 int my_objdump(char *prog_name, char *name)
