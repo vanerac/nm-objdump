@@ -79,12 +79,11 @@ void print_sym(void *buffer, void *shdr)
     }
 }
 
-int main(int ac, char **ag)
+int my_nm(char *prog_name, char *path)
 {
     void *buffer;
-    if (ac < 2)
-        return 84;
-    size_t size = parse_file(ag[1], &buffer);
+
+    size_t size = parse_file(path, &buffer);
     if (error_check(size, buffer)) {
         munmap(buffer, size);
         return 84;
@@ -98,4 +97,16 @@ int main(int ac, char **ag)
         }
     }
     munmap(buffer, size);
+    return 0;
+}
+
+int main(int ac, char **ag)
+{
+    if (ac < 2)
+        return my_nm(ag[0], "a.out");
+    int ret = 0;
+    for (int i = 1; i < ac; ++i)
+        ret += my_nm(ag[0], ag[i]);
+
+    return ret != 0 ? 84 : 0;
 }

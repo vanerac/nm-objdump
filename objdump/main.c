@@ -28,6 +28,7 @@ void print_header(char *filename, void *buffer)
     int type = GET_ELF_EHDR(buffer, e_type);
     unsigned int flags = 0;
     // todo print flags
+    // todo test for rel file
 
     flags = type == ET_EXEC ? (EXEC_P | D_PAGED) : flags;
     flags = type == ET_DYN ? (DYNAMIC | D_PAGED) : flags;
@@ -59,7 +60,6 @@ void print_text(unsigned char *str, int size)
 
 void print_section(const char *name, void *buffer, void *addr)
 {
-    // todo test wil rel file
     if (!GET_ELF_SHDR(addr, sh_size))
         return;
     printf("Contents of section %s:\n", name);
@@ -80,9 +80,8 @@ void print_section(const char *name, void *buffer, void *addr)
         printf("%02x", add[i]);
     }
 
-
-    unsigned long diff = (i % 16);
-    for (unsigned long index = 0;
+    unsigned short diff = (i % 16);
+    for (unsigned short index = 0;
         diff && index < ((16 - diff) * 2 + (16 - diff) / 4); ++index)
         printf(" ");
 
@@ -92,7 +91,7 @@ void print_section(const char *name, void *buffer, void *addr)
     printf("\n");
 }
 
-int my_objdump(char *name)
+int my_objdump(char *prog_name, char *name)
 {
     void *buffer;
 
@@ -116,9 +115,10 @@ int my_objdump(char *name)
 int main(int ac, char **ag)
 {
     if (ac < 2)
-        return my_objdump("a.out");
+        return my_objdump(ag[0], "a.out");
+    int ret = 0;
     for (int i = 1; i < ac; ++i)
-        my_objdump(ag[i]);
+        ret += my_objdump(ag[0], ag[i]);
 
-    return 0;
+    return ret != 0 ? 84 : 0;
 }
