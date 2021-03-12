@@ -6,6 +6,7 @@
 */
 
 #include <stddef.h>
+#include <string.h>
 #include "../tools/tools.h"
 
 char symbol_type(size_t value, int type, int bind)
@@ -64,7 +65,7 @@ void print_sym(void *buffer, void *shdr)
         int bind = !IS64ARCH ? ELF32_ST_BIND(GET_ELF_SYM(sym, st_info)) :
             ELF64_ST_BIND(GET_ELF_SYM(sym, st_info));
 
-        if (type == STT_FILE || visibility != STV_DEFAULT)
+        if (type == STT_FILE || !strlen(get_symbol_name(buffer, nm)))
             continue;
 
         // todo filter null names
