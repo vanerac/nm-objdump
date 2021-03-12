@@ -99,7 +99,7 @@ int my_objdump(char *name)
     size_t size = parse_file(name, &buffer);
     if (error_check(size, buffer)) {
         munmap(buffer, size);
-        return 1;
+        return 84;
     }
     print_header(name, buffer);
 
