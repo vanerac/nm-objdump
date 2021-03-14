@@ -42,7 +42,6 @@ size_t parse_file(char *prog_name, char *path, void **buff)
 {
     int fd;
     struct stat s;
-
     if ((fd = open(path, O_RDONLY)) < 0)
         return 0;
     fstat(fd, &s);
@@ -51,17 +50,14 @@ size_t parse_file(char *prog_name, char *path, void **buff)
     int class = GET_ELF_EHDR(*buff, e_ident[EI_CLASS]);
     int data = GET_ELF_EHDR(*buff, e_ident[EI_DATA]);
     IS64ARCH = GET_ELF_EHDR(*buff, e_ident[EI_CLASS]) == 1 ? 0 : 1;
-
     if ((class != ELFCLASS64 && class != ELFCLASS32) ||
         (data != ELFDATA2LSB && data != ELFDATA2MSB) ||
         (GET_ELF_EHDR(*buff, e_shnum) * GET_ELF_EHDR(*buff, e_shentsize) +
-            GET_ELF_EHDR(*buff, e_shoff) > s.st_size) ||
+            GET_ELF_EHDR(*buff, e_shoff) != s.st_size) ||
         strncmp((char *) *buff, "\x7f\x45\x4c\x46", 4) != 0) {
-        fprintf(stderr, "%s: %s: %s\n", prog_name, path,
-            "file format not recognized");
-        return 0;
+        return 0 * fprintf(stderr, "%s: %s: %s\n",
+            prog_name, path, "file format not recognized");
     }
-
     IS64ARCH = GET_ELF_EHDR(*buff, e_ident[EI_CLASS]) == 1 ? 0 : 1;
     return s.st_size;
 }
